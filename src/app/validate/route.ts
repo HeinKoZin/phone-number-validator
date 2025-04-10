@@ -100,29 +100,49 @@ function validatePhoneNumber(phoneNumber: string) {
   return { valid: true, operator, operator_code };
 }
 
+// --- Define CORS Headers ---
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*", // Allow any origin
+  "Access-Control-Allow-Methods": "GET, OPTIONS", // Allow GET and OPTIONS methods
+  "Access-Control-Allow-Headers": "Content-Type, Authorization", // Allow common headers
+};
+
 export function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const phone = searchParams.get("phone");
 
   if (!phone) {
-    return Response.json({
-      success: false,
-      message: "Phone number is required!",
-    });
+    return Response.json(
+      {
+        success: false,
+        message: "Phone number is required!",
+      },
+      {
+        status: 400,
+        headers: corsHeaders, // Add headers here
+      },
+    );
   }
 
   const { valid, operator, operator_code } = validatePhoneNumber(phone ?? "");
-  return Response.json({
-    operator,
-    operator_code,
-    valid,
-    success: true,
-    message: "Phone operator is return.",
-  });
+  return Response.json(
+    {
+      operator,
+      operator_code,
+      valid,
+      success: true,
+      message: "Phone operator is return.",
+    },
+    {
+      status: 200,
+      headers: corsHeaders, // Add headers here
+    },
+  );
 }
 
 export const OPTIONS = async (request: Request) => {
-  return new Response("", {
-    status: 200,
+  return new Response(null, {
+    status: 204, // 204 No Content is standard for successful preflight
+    headers: corsHeaders, // !! Crucially, add the CORS headers here !!
   });
 };
